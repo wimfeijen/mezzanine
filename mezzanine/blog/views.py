@@ -28,6 +28,7 @@ def blog_post_list(request, tag=None, year=None, month=None, username=None,
     """
     templates = []
     blog_posts = BlogPost.objects.published(for_user=request.user)
+    month_number = None
     if tag is not None:
         tag = get_object_or_404(Keyword, slug=tag)
         blog_posts = blog_posts.filter(keywords__keyword=tag)
@@ -36,7 +37,8 @@ def blog_post_list(request, tag=None, year=None, month=None, username=None,
         if month is not None:
             blog_posts = blog_posts.filter(publish_date__month=month)
             try:
-                month = month_name[int(month)]
+                month_number = int(month)
+                month = month_name[month_number]
             except IndexError:
                 raise Http404()
     if category is not None:
@@ -56,6 +58,7 @@ def blog_post_list(request, tag=None, year=None, month=None, username=None,
                           settings.BLOG_POST_PER_PAGE,
                           settings.MAX_PAGING_LINKS)
     context = {"blog_posts": blog_posts, "year": year, "month": month,
+               "month_number": month_number, 
                "tag": tag, "category": category, "author": author}
     context.update(extra_context or {})
     templates.append(template)
